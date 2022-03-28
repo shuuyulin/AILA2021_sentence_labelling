@@ -1,0 +1,14 @@
+file: BERT-BiLSTM-CRF
+
+cfg['batch_size'] = 16
+cfg['epoch'] = 20
+cfg['lr'] = 1e-5
+cfg['seq_len'] = 256
+cfg['padding_threshold'] = 0
+cfg['dropout_rate'] = 0.5 (between crf, lstm)
+
+model: Legal-BERT
+optimizer: AdamW
+scheduler: ReduceLROnPlateau
+
+best: 0.621

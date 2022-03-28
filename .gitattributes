@@ -1,0 +1,11 @@
+*.pth filter=lfs diff=lfs merge=lfs -text
+16best_model.pth filter=lfs diff=lfs merge=lfs -text
+12best_model.pth filter=lfs diff=lfs merge=lfs -text
+**.pth filter=lfs diff=lfs merge=lfs -text
+BERT_BiLSTM_CRF/finetuned_BERT.pth filter=lfs diff=lfs merge=lfs -text
+record/13/13best_model.pth filter=lfs diff=lfs merge=lfs -text
+record/14/14best_model.pth filter=lfs diff=lfs merge=lfs -text
+record/15/15best_model.pth filter=lfs diff=lfs merge=lfs -text
+record/16/16best_model.pth filter=lfs diff=lfs merge=lfs -text
+record/11/11best_model.pth filter=lfs diff=lfs merge=lfs -text
+record/12/12best_model.pth filter=lfs diff=lfs merge=lfs -text

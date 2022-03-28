@@ -1,0 +1,27 @@
+file: BERT-BiLSTM-CRF
+
+cfg['batch_size'] = 4
+cfg['epoch'] = 30
+cfg['lr'] = 1e-3
+cfg['seq_len'] = 658
+cfg['padding_threshold'] = 300
+cfg['dropout_rate'] = 0.5 (between crf, lstm)
+
+model: Legal-BERT
+optimizer: Ranger21
+scheduler: CosineAnnealingLR
+
+valid best: 0.61
+
+# testing
+Document 01 acc: 0.5690
+Document 02 acc: 0.8594
+Document 03 acc: 0.6735
+Document 04 acc: 0.6444
+Document 05 acc: 0.4500
+Document 06 acc: 0.5663
+Document 07 acc: 0.5441
+Document 08 acc: 0.4557
+Document 09 acc: 0.4388
+Document 10 acc: 0.7434
+Average acc: 0.5944

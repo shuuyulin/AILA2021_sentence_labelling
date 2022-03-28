@@ -1,0 +1,12 @@
+file: BERT_NERlike
+
+cfg['batch_size'] = 4
+cfg['epoch'] = 7
+cfg['lr'] = 1e-5
+cfg['seq_len'] = 7
+
+model: Legal-BERT
+optimizer: AdamW
+scheduler: ReduceLROnPlateau
+
+best: 0.676
