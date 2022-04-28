@@ -33,14 +33,15 @@
 (max: 658)  
 ![](https://i.imgur.com/RjnN870.png)  
 (max: 471)  
+![image](https://user-images.githubusercontent.com/56257705/165811629-8cd272c4-9f35-4fec-ab3f-081c75f0d4bc.png)
 
 ## Model  
 - Bert-BiLSTM-CRF  
 <img src="https://user-images.githubusercontent.com/56257705/164142250-e5fa90f8-0fb2-47c1-a237-d57fd4b786f6.png" width="500" />  
 - BERT_CLSlike  
-<img src="https://user-images.githubusercontent.com/56257705/164142434-ea208d9e-1f2e-4b7e-a91b-43532394aee5.png" width="500" />  
+<img src="https://user-images.githubusercontent.com/56257705/165811478-3ca8ac08-b787-4b8a-b8d3-143254cebcb0.png" width="500" />  
 - BERT_NERlike  
-<img src="https://user-images.githubusercontent.com/56257705/164142494-e27b4e70-7e73-4c8a-a047-8b1ebc5d6945.png" width="500" />  
+<img src="https://user-images.githubusercontent.com/56257705/165811629-8cd272c4-9f35-4fec-ab3f-081c75f0d4bc.png" width="500" />  
 - pipe-line model  
 <img src="https://user-images.githubusercontent.com/56257705/164142728-fca88c85-548d-45c1-b8c5-1d91c5fdbd64.png" width="500" />  
 
