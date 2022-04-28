@@ -33,7 +33,6 @@
 (max: 658)  
 ![](https://i.imgur.com/RjnN870.png)  
 (max: 471)  
-![image](https://user-images.githubusercontent.com/56257705/165811629-8cd272c4-9f35-4fec-ab3f-081c75f0d4bc.png)
 
 ## Model  
 - Bert-BiLSTM-CRF  
