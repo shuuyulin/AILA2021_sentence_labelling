@@ -26,7 +26,7 @@ class NERlikeBERTClassifier(nn.Module):
             for param in self.bert.parameters():
                 param.requires_grad = False
         
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = torch.nn.CrossEntropyLoss(ignore_index=-100)
         
     def forward(self, input_ids, token_type_ids, attention_mask, sent_pos, target=None):
         """

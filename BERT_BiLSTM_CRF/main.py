@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 # Configuration
 cfg = {}
 cfg['embed_from'] = 'mean_fined_BERT' # mean or cls or mean_fined_BERT (fine-tuned by same prediction task)
+cfg['record'] = 19
 cfg['batch_size'] = 16
 cfg['epoch'] = 20
 cfg['lr'] = 1e-5
@@ -32,8 +33,12 @@ TRAINEMBPATH = os.path.join(BASEPATH, f'../processed_data/train_bert_embedding_{
 VALIDEMBPATH = os.path.join(BASEPATH, f'../processed_data/valid_bert_embedding_{cfg["embed_from"]}.pkl')
 PADEMBPATH = os.path.join(BASEPATH, f'../processed_data/PAD_embedding_{cfg["embed_from"]}.pkl')
 CATNAMEPATH = os.path.join(BASEPATH, '../processed_data/catagories_name.json')
-RECORDPATH = os.path.join(BASEPATH, '../record')
-MODELPATH = os.path.join(RECORDPATH, './best_model.pth')
+RECORDPATH = os.path.join(BASEPATH, f'../record/{cfg["record"]}/')
+
+if not os.path.isdir(os.path.join(BASEPATH, f'../record{cfg["record"]}')):
+    os.mkdir(os.path.join(RECORDPATH, str(cfg["record"])))
+MODELPATH = os.path.join(RECORDPATH, f'./{cfg["record"]}best_model.pth')
+
 # Fix random seed for reproducibility
 same_seeds(0)
 
@@ -84,7 +89,7 @@ def main():
         tr_loss, tr_acc = train_one(model, train_loader, optimizer, scheduler)
         vl_loss, vl_acc = valid_one(model, valid_loader)
         lrs.append(get_lr(optimizer))
-        # scheduler.step(vl_acc)
+        scheduler.step(vl_acc)
         tr_losses.append(tr_loss)
         vl_losses.append(vl_loss)
         tr_acces.append(tr_acc)
@@ -119,8 +124,9 @@ def train_one(model, dataloader, optimizer, scheduler):
     
             optimizer.step()
             # scheduler.step()
-
-            nowloss = loss.item() / cfg['seq_len'] # loss is mean as torch-crf attibute: reduciton='mean'
+            
+            prednum = torch.sum(data['sent_mask'].cpu()).detach()
+            nowloss = loss.item() / prednum # loss is mean over batchs as torch-crf attibute: reduciton='mean'
 
             acc = acc_counting(output.cpu(), data['target'].cpu(), data['sent_mask'].cpu())
 
@@ -131,7 +137,8 @@ def train_one(model, dataloader, optimizer, scheduler):
 
 def valid_one(model, dataloader):
     model.eval()
-
+    totalloss, totalacc, totalprednum = 0, 0, 0
+    
     with torch.no_grad():
         with tqdm(dataloader,unit='batch',desc='Valid') as tqdm_loader:
             for idx, data in enumerate(tqdm_loader):
@@ -140,13 +147,17 @@ def valid_one(model, dataloader):
             
                 output, loss = model(**data)
                 
-                nowloss = loss.item() / cfg['seq_len']
+                prednum = torch.sum(data['sent_mask'].cpu()).detach()
                 
+                nowloss = loss.item() / prednum
                 acc = acc_counting(output.cpu(), data['target'].cpu(), data['sent_mask'].cpu())
                 
-                totalloss += nowloss
-                totalacc += acc
-                tqdm_loader.set_postfix(loss=nowloss, avgloss=totalloss/(idx+1) ,avgACC=totalacc/(idx+1))
-    return totalloss/len(tqdm_loader), totalacc/len(tqdm_loader)
+                totalprednum += prednum
+                totalloss += nowloss * prednum
+                totalacc += acc * prednum
+                
+                tqdm_loader.set_postfix(loss=nowloss, avgloss=totalloss/(totalprednum) ,avgACC=totalacc/(totalprednum))
+                
+    return totalloss/totalprednum, totalacc/totalprednum
 if __name__ == '__main__':
     main()

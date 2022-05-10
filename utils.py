@@ -27,9 +27,12 @@ def get_lr(optimizer):
 
 def acc_counting(pred, truth, mask=None):
     # tensor, tensor, tensor(bool)
+    pred = torch.Tensor(pred) if not isinstance(pred, torch.Tensor) else pred
+    truth = torch.Tensor(truth) if not isinstance(truth, torch.Tensor) else truth
     pred = pred.view(-1)
     truth = truth.view(-1)
     if mask != None:
+        mask = torch.Tensor(mask) if not isinstance(mask, torch.Tensor) else mask
         mask = mask.view(-1)
         assert pred.shape == truth.shape == mask.shape, f'Shape not match! {pred.shape}, {truth.shape}, {mask.shape}'
         acc = 0
@@ -37,6 +40,7 @@ def acc_counting(pred, truth, mask=None):
         for i in range(len(pred)):
             if mask[i] == 1 and pred[i] == truth[i]:
                 acc += 1
+        # print(acc)
         return (acc / tt).item()
     else:
         assert pred.shape == truth.shape, f'Shape not match! {pred.shape}, {truth.shape}'
@@ -71,3 +75,28 @@ def plot_confusion_matrix(conf_matrix, save_fg_path='./confusion_matrix.png'):
     plt.show()
     if(save_fg_path!=None):
         plt.savefig(save_fg_path)
+        
+# calculate accuracy
+def doc_accuracy_score(df, pred, isPrint=True, mask=None):
+    docid = set(df['docid'].tolist())
+    ttdacc, allacc, alltt = 0, 0, 0
+    for id in docid:
+        idxrange = df.index[df['docid'] == id].tolist()
+        # print(idxrange)
+        # print(idxrange)
+        if mask is not None:
+            acc = acc_counting(df['category'][idxrange].tolist(), pred[idxrange].tolist(), mask[idxrange].tolist())
+        else:
+            acc = acc_counting(df['category'][idxrange].tolist(), pred[idxrange].tolist())
+        if isPrint:
+            print(f'Document {id:0>2d} acc: {acc:.4f}')
+        ttdacc += acc
+        allacc += acc * len(pred[idxrange])
+        alltt += len(pred[idxrange])
+    # print(ttdacc/len(docid))
+    # print(allacc/alltt)
+    if isPrint:
+        print(f'Average acc over documents: {ttdacc/len(docid):.4f}')
+        print(f'Average acc of all sentences:  {allacc/alltt:.4f}')
+    else:
+        return ttdacc/len(docid), allacc/alltt

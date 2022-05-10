@@ -16,26 +16,24 @@ class HierBERTDataset(Dataset):
         # idx to embedding idx is an abnormal mapping relation
         self.idx2embidx = {}
 
+        l_idx = 0 # last index of tokenized
         for idx in range(len(self)):
             d_idx = 0 # head index of document of dataset
-            f_idx = 0 # first index of embedding
-            l_idx = 0 # last index of embedding
-            if isTrain:
-                for i in self.doc_len:
-                    if d_idx + max(1, i - self.padding_threshold) > idx:
-                        f_idx += idx - d_idx
-                        l_idx = f_idx + min(self.seq_len, i)
-                        break
-                    d_idx += max(1, i - self.padding_threshold)
-                    f_idx += i
-            else:
-                for i in self.doc_len:
-                    if d_idx + int(math.ceil(i / self.seq_len)) > idx:
-                        f_idx += idx - d_idx
-                        l_idx = f_idx + min(self.seq_len, i)
-                        break
-                    d_idx += int(math.ceil(i / self.seq_len))
-                    f_idx += i
+            f_idx = 0 # first index of tokenized
+            d_l_idx = 0  # last index of document of tokenized
+            for i in self.doc_len:
+                d_l_idx += i
+                tmp = max(1, i - self.padding_threshold) if isTrain else int(math.ceil(i / self.seq_len))
+                if d_idx + tmp > idx:
+                    if isTrain:
+                        f_idx += idx - d_idx 
+                    else:
+                        f_idx = l_idx
+                    l_idx = min(f_idx + seq_len, d_l_idx)
+                    break
+                d_idx += tmp
+                f_idx += i
+                
             self.idx2embidx[idx] = (f_idx, l_idx)
             
     def __len__(self):
@@ -60,7 +58,7 @@ class HierBERTDataset(Dataset):
         for _ in range(self.seq_len - len(embedding_seq)):
             embedding_seq = np.append(embedding_seq, self.pad_bert_embedding, axis=0)
         sent_mask += [0] * (self.seq_len - len(sent_mask))
-        target += [0] * (self.seq_len - len(target)) #被mask不被訓練
+        target += [-100] * (self.seq_len - len(target)) #被mask不被訓練
         
         return {
             'bert_embedding' : torch.Tensor(embedding_seq),

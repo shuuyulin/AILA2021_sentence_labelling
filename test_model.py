@@ -17,12 +17,12 @@ from tqdm.auto import tqdm
 # Configuration
 cfg = {}
 cfg['BERT_model'] = 'nlpaueb/legal-bert-base-uncased'
-cfg['model_name'] = 'BERT_BiLSTM_CRF' # 'c' or 'BERT_CLSlike' or 'BERT_NERlike'
+cfg['model_name'] = 'BERT_NERlike' # 'BERT_BiLSTM_CRF' or 'BERT_CLSlike' or 'BERT_NERlike'
 cfg['embed_from'] = 'mean' # mean or cls or mean_fined_BERT
 cfg['batch_size'] = 2
-cfg['seq_len'] = 658 # number of input sentences
+cfg['seq_len'] = 5 # number of input sentences
 cfg['padding_threshold'] = 0 # not used
-cfg['device'] = "cuda" if torch.cuda.is_available() else "cpu"
+cfg['device'] = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
 
 # Path
 BASEPATH = os.path.dirname(__file__)
@@ -32,7 +32,7 @@ TESTEMBPATH = os.path.join(BASEPATH, f'./processed_data/test_bert_embedding_{cfg
 # TESTEMBPATH = os.path.join(BASEPATH, f'./processed_data/train_bert_embedding_{cfg["embed_from"]}.pkl')
 PADEMBPATH = os.path.join(BASEPATH, f'./processed_data/PAD_embedding_{cfg["embed_from"]}.pkl')
 CATNAMEPATH = os.path.join(BASEPATH, './processed_data/catagories_name.json')
-MODELPATH = os.path.join(BASEPATH, './12best_model.pth')
+MODELPATH = os.path.join(BASEPATH, './17best_model.pth')
 # Read files
 test_df = pd.read_csv(TESTPATH)
 classes, num_class = read_classes(CATNAMEPATH)
@@ -55,7 +55,7 @@ if cfg['model_name'] == 'BERT_CLSlike':
     test_set = CLSlikeDataset(test_df, test_tokenized, seq_len=cfg['seq_len'])
 elif cfg['model_name'] == 'BERT_NERlike':
     model = NERlikeBERTClassifier(cfg['BERT_model'], num_class, freeze_bert=False).to(device=cfg['device'])
-    # test_set = NERlikeDataset
+    test_set = NERlikeDataset(test_df, test_tokenized, seq_len=cfg['seq_len'], isTrain=False)
 elif cfg['model_name'] == 'BERT_BiLSTM_CRF':
     test_doc_len = test_df.groupby('docid').size().values.tolist()
     model = BiLSTM_CRF(num_class=num_class, hidden_dim=128).to(cfg['device'])
@@ -68,7 +68,11 @@ model.load_state_dict(torch.load(MODELPATH))
 
 model.eval()
 totalloss, bestloss, totalacc, bestacc = 0, 10, 0, 0
-predlist = []
+predlist, masklist = [], []
+
+print(len(test_df.index))
+print(len(test_set))
+
 with torch.no_grad():
     with tqdm(test_loader, unit='batch',desc='Test') as tqdm_loader:
         if cfg['model_name'] == 'BERT_CLSlike':
@@ -79,9 +83,24 @@ with torch.no_grad():
                 output = output.logits.cpu()
                 pred = torch.argmax(output, dim=1)
                 predlist.append(pred.tolist())
-                
+              
+            pred = np.concatenate(np.array(predlist, dtype=object), axis=0)
         elif cfg['model_name'] == 'BERT_NERlike':
-            pass
+            for data, sent_mask in tqdm_loader:
+                for k in data:
+                    data[k] = data[k].to(cfg['device'])
+                output, _ = model(**data)
+                pred = torch.argmax(output.cpu(), dim=2)
+                predlist.append(pred)
+                masklist.append(sent_mask)
+                        
+            pred = np.concatenate(np.array(predlist, dtype=object), axis=0).reshape(-1)
+            mask = np.concatenate(np.array(masklist, dtype=object), axis=0).reshape(-1)
+            print(len(mask), ' ', len(pred))
+            pred = pred[mask==1]
+            print(len(mask), ' ', len(pred))
+            doc_accuracy_score(test_df, pred, isPrint=True)
+        
         elif cfg['model_name'] == 'BERT_BiLSTM_CRF':
             for data in tqdm_loader:
                 for k in data:
@@ -91,25 +110,12 @@ with torch.no_grad():
                 output = output.cpu()[data['sent_mask'].cpu() != False]
                 predlist.append(output.tolist())
             
+            pred = np.concatenate(np.array(predlist, dtype=object), axis=0)
+            doc_accuracy_score(test_df, pred, isPrint=True)
 # print(predlist)
-pred = np.concatenate(np.array(predlist, dtype=object), axis=0)
-
 # print(pred)
+
 from sklearn.metrics import accuracy_score, confusion_matrix
-# calculate accuracy
-docid = set(test_df['docid'].tolist())
-ttdacc = 0
-allacc = 0
-alltt = 0
-for id in docid:
-    idxrange = test_df.index[test_df['docid'] == id].tolist()
-    acc = accuracy_score(test_df['category'][idxrange].tolist(), pred[idxrange].tolist())
-    print(f'Document {id:0>2d} acc: {acc:.4f}')
-    ttdacc += acc
-    allacc += acc * len(pred[idxrange])
-    alltt += len(pred[idxrange])
-print(f'Average acc over documents: {ttdacc/len(docid):.4f}')
-print(f'Average acc of all sentences:  {allacc/alltt:.4f}')
 # confusion matrix
 
 con_matrix = confusion_matrix(test_df['category'].tolist(), pred.tolist())
