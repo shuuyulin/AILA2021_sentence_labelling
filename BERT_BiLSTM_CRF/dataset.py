@@ -58,7 +58,7 @@ class HierBERTDataset(Dataset):
         for _ in range(self.seq_len - len(embedding_seq)):
             embedding_seq = np.append(embedding_seq, self.pad_bert_embedding, axis=0)
         sent_mask += [0] * (self.seq_len - len(sent_mask))
-        target += [-100] * (self.seq_len - len(target)) #被mask不被訓練
+        target += [0] * (self.seq_len - len(target)) #被mask不被訓練
         
         return {
             'bert_embedding' : torch.Tensor(embedding_seq),

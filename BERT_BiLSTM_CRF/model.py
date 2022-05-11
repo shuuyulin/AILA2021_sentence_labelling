@@ -55,7 +55,7 @@ class BiLSTM_CRF(nn.Module):
         # full 0 in masked crf output
         crf_output = torch.Tensor([i + [0] * (seq_len - len(i)) for i in crf_output])
 #         display(crf_output.shape)
-        if target != None:                    
+        if target != None:
             loss = -self.crf(emit_score, target, sent_mask, reduction='mean')
             return crf_output, loss
         else:

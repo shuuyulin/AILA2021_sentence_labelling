@@ -17,12 +17,13 @@ from tqdm.auto import tqdm
 # Configuration
 cfg = {}
 cfg['BERT_model'] = 'nlpaueb/legal-bert-base-uncased'
-cfg['model_name'] = 'BERT_NERlike' # 'BERT_BiLSTM_CRF' or 'BERT_CLSlike' or 'BERT_NERlike'
-cfg['embed_from'] = 'mean' # mean or cls or mean_fined_BERT
+cfg['model_name'] = 'BERT_BiLSTM_CRF' # 'BERT_BiLSTM_CRF' or 'BERT_CLSlike' or 'BERT_NERlike'
+cfg['embed_from'] = 'mean_fined_BERT' # mean or cls or mean_fined_BERT
 cfg['batch_size'] = 2
 cfg['seq_len'] = 5 # number of input sentences
 cfg['padding_threshold'] = 0 # not used
 cfg['device'] = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
+cfg['record'] = 19
 
 # Path
 BASEPATH = os.path.dirname(__file__)
@@ -32,7 +33,9 @@ TESTEMBPATH = os.path.join(BASEPATH, f'./processed_data/test_bert_embedding_{cfg
 # TESTEMBPATH = os.path.join(BASEPATH, f'./processed_data/train_bert_embedding_{cfg["embed_from"]}.pkl')
 PADEMBPATH = os.path.join(BASEPATH, f'./processed_data/PAD_embedding_{cfg["embed_from"]}.pkl')
 CATNAMEPATH = os.path.join(BASEPATH, './processed_data/catagories_name.json')
-MODELPATH = os.path.join(BASEPATH, './17best_model.pth')
+RECORDPATH = os.path.join(BASEPATH, f'record/{cfg["record"]}')
+MODELPATH = os.path.join(RECORDPATH, f'{cfg["record"]}best_model.pth')
+
 # Read files
 test_df = pd.read_csv(TESTPATH)
 classes, num_class = read_classes(CATNAMEPATH)
@@ -119,4 +122,4 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 # confusion matrix
 
 con_matrix = confusion_matrix(test_df['category'].tolist(), pred.tolist())
-plot_confusion_matrix(con_matrix, os.path.join(BASEPATH, 'confusion_matrix.png'))
+plot_confusion_matrix(con_matrix, os.path.join(RECORDPATH, 'confusion_matrix.png'))

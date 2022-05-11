@@ -35,9 +35,9 @@ PADEMBPATH = os.path.join(BASEPATH, f'../processed_data/PAD_embedding_{cfg["embe
 CATNAMEPATH = os.path.join(BASEPATH, '../processed_data/catagories_name.json')
 RECORDPATH = os.path.join(BASEPATH, f'../record/{cfg["record"]}/')
 
-if not os.path.isdir(os.path.join(BASEPATH, f'../record{cfg["record"]}')):
-    os.mkdir(os.path.join(RECORDPATH, str(cfg["record"])))
-MODELPATH = os.path.join(RECORDPATH, f'./{cfg["record"]}best_model.pth')
+if not os.path.isdir(RECORDPATH):
+    os.mkdir(RECORDPATH)
+MODELPATH = os.path.join(RECORDPATH, f'best_model.pth')
 
 # Fix random seed for reproducibility
 same_seeds(0)
@@ -125,7 +125,7 @@ def train_one(model, dataloader, optimizer, scheduler):
             optimizer.step()
             # scheduler.step()
             
-            prednum = torch.sum(data['sent_mask'].cpu()).detach()
+            prednum = torch.sum(data['sent_mask'].cpu()).item()
             nowloss = loss.item() / prednum # loss is mean over batchs as torch-crf attibute: reduciton='mean'
 
             acc = acc_counting(output.cpu(), data['target'].cpu(), data['sent_mask'].cpu())
@@ -147,7 +147,7 @@ def valid_one(model, dataloader):
             
                 output, loss = model(**data)
                 
-                prednum = torch.sum(data['sent_mask'].cpu()).detach()
+                prednum = torch.sum(data['sent_mask'].cpu()).item()
                 
                 nowloss = loss.item() / prednum
                 acc = acc_counting(output.cpu(), data['target'].cpu(), data['sent_mask'].cpu())
