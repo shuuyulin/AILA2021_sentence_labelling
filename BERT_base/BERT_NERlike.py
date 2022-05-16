@@ -14,19 +14,24 @@ from tqdm.auto import tqdm
 # Configurations
 cfg = {}
 cfg['model_name'] = 'nlpaueb/legal-bert-base-uncased'
-cfg['split'] = 0.8
+cfg['record'] = 19
 cfg['batch_size'] = 4
 cfg['epoch'] = 7
 cfg['lr'] = 1e-5
 cfg['seq_len'] = 5 # number of input sentences
 cfg['device'] =  "cuda" if torch.cuda.is_available() else "cpu"
+
 # Paths
 BASEPATH = os.path.dirname(__file__)
 TRAINPATH = os.path.join(BASEPATH, '../processed_data/train_data.csv')
 VALIDPATH = os.path.join(BASEPATH, '../processed_data/valid_data.csv')
 CATNAMEPATH = os.path.join(BASEPATH, '../processed_data/catagories_name.json')
 MODELPATH = os.path.join(BASEPATH, './best_model.pth')
-RECORDPATH = os.path.join(BASEPATH, '../record')
+RECORDPATH = os.path.join(BASEPATH, f'../record/{cfg["record"]}/')
+
+if not os.path.isdir(RECORDPATH):
+    os.mkdir(RECORDPATH)
+MODELPATH = os.path.join(RECORDPATH, f'{cfg["record"]}best_model.pth')
 
 # Fix random seed for reproducibility
 same_seeds(0)

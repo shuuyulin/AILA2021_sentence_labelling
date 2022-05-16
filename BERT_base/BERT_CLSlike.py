@@ -15,7 +15,7 @@ from ranger21 import Ranger21
 cfg = {}
 cfg['model_name'] = 'nlpaueb/legal-bert-base-uncased'
 cfg['batch_size'] = 4
-
+cfg['record'] = 19
 cfg['epoch'] = 4
 cfg['lr'] = 1e-5
 cfg['seq_len'] = 5
@@ -27,7 +27,12 @@ TRAINPATH = os.path.join(BASEPATH, '../processed_data/train_data.csv')
 VALIDPATH = os.path.join(BASEPATH, '../processed_data/valid_data.csv')
 CATNAMEPATH = os.path.join(BASEPATH, '../processed_data/catagories_name.json')
 MODELPATH = os.path.join(BASEPATH, './best_model.pth')
-RECORDPATH = os.path.join(BASEPATH, '../record')
+RECORDPATH = os.path.join(BASEPATH, f'../record/{cfg["record"]}/')
+
+if not os.path.isdir(RECORDPATH):
+    os.mkdir(RECORDPATH)
+MODELPATH = os.path.join(RECORDPATH, f'{cfg["record"]}best_model.pth')
+
 # Fix random seed for reproducibility
 same_seeds(0)
 

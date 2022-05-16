@@ -1,17 +1,18 @@
-# AILA 2020 task 1 rhetorical labelling  
+# AILA 2021 task 1 rhetorical labelling  
 
-[competition source](https://sites.google.com/view/aila-2021)  
-法律援助人工智能 (AILA) 是一系列法律相關共享任務，旨在開發數據集和方法來解決各種法律信息學問題。  
+[AILA 2021](https://sites.google.com/view/aila-2021)  
 
-## Task  
-此任務旨在對法律文件進行語意分割，具體而言這是一個句子分類任務，每一個句子必須被分配給七個預定義的修辭角色，包涵 Facts、Ruling by Lower Court、Argument、Statute、Precedent、Ratio of the decision、Ruling by the Present Court。
+Artificial Intelligence Legal Assistance is a series of shared tasks. It aimed at building datasets and resolving a variety of  legal informatic problems.  
+
+## AILA 2021 task 1  
+This task is to sematic segmentation a legal document. Specifically, it a sentence labelling task. Each sentence of a India Legal jedgement should be assigned to a "Rhetorical Role", including Facts, Ruling by Lower Court, Argument, Statute, Precedent, Ratio of the decision and Ruling by the Present Court.
 
 <img src="https://user-images.githubusercontent.com/56257705/168584241-1a11ff1d-c386-4e66-9bb8-3f0412947007.png" width="500" />  
 
 ## Dataset
-- 60 traning documents  
-  -  split to 48:12 training:validation  
--  10 testing documents  
+- 60 trianing documents  
+  -  split to 48/12 training/validation  
+- 10 testing documents  
 
 ## Data analyzation
 - Categories Distribution Pie Chart  
@@ -70,4 +71,13 @@
 | BERT single-seq labeling   | 0.672 | 0.697 |
 | BERT multi-seq labeling    | 0.659 | 0.658 |
 | BERT-BiLSTM-CRF            | 0.619 | 0.623 |
-| BERT-BiLSTM-CRF fine-tuned | 0.739 | 0.695 |  
+| BERT-BiLSTM-CRF fine-tuned | 0.663 | 0.695 |  
+
+## How to use?
+- training  
+BERT single-seq labelling at ```BERT_base/BERT_CLS_like.py```  
+BERT multi-seq labelling at ```BERT_base/BERT_NER_like.py```  
+BERT-BiLSTM-CRF at ```BERT_BiLSTM_CRF/main.py```  
+at the root folder of repo run ```python -m AILA2021_sentence_labelling.{file path}```  
+- testing  
+at the root folder of repo run ```python -m AILA2021_sentence_labelling.test_model```  

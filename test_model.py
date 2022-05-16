@@ -21,7 +21,7 @@ cfg['model_name'] = 'BERT_BiLSTM_CRF' # 'BERT_BiLSTM_CRF' or 'BERT_CLSlike' or '
 cfg['embed_from'] = 'mean_fined_BERT' # mean or cls or mean_fined_BERT
 cfg['batch_size'] = 2
 cfg['seq_len'] = 5 # number of input sentences
-cfg['padding_threshold'] = 0 # not used
+cfg['padding_threshold'] = 0 # max number of sentence padding
 cfg['device'] = "cpu" #"cuda" if torch.cuda.is_available() else "cpu"
 cfg['record'] = 19
 

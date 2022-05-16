@@ -37,7 +37,7 @@ RECORDPATH = os.path.join(BASEPATH, f'../record/{cfg["record"]}/')
 
 if not os.path.isdir(RECORDPATH):
     os.mkdir(RECORDPATH)
-MODELPATH = os.path.join(RECORDPATH, f'best_model.pth')
+MODELPATH = os.path.join(RECORDPATH, f'{cfg["record"]}best_model.pth')
 
 # Fix random seed for reproducibility
 same_seeds(0)
